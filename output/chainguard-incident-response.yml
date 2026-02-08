@@ -392,6 +392,7 @@ spec:
     WHERE
       time > (strftime('%s', 'now') -900)
   platform: darwin,linux
+  interval: 900
   logging: snapshot
 ---
 apiVersion: v1
@@ -436,6 +437,7 @@ spec:
         OR btime > (strftime('%s', 'now') -3600)
       )
   platform: darwin,linux
+  interval: 3600
   logging: snapshot
 ---
 apiVersion: v1
@@ -508,6 +510,7 @@ spec:
     GROUP BY
       inode;
   platform: darwin,linux
+  interval: 3600
   logging: snapshot
 ---
 apiVersion: v1
@@ -1108,6 +1111,7 @@ spec:
       pe.pid,
       pe.eid
   platform: darwin,linux
+  interval: 600
   logging: snapshot
 ---
 apiVersion: v1
@@ -1408,6 +1412,7 @@ spec:
     WHERE
       time > (strftime('%s', 'now') -600)
   platform: darwin,linux
+  interval: 600
   logging: snapshot
 ---
 apiVersion: v1
@@ -1505,6 +1510,7 @@ spec:
     WHERE
       timestamp > (strftime('%s', 'now') - 1800)
   platform: darwin
+  interval: 1800
   logging: snapshot
 ---
 apiVersion: v1

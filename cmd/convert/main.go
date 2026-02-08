@@ -17,6 +17,7 @@ type Query struct {
 	Query       string
 	Platform    string
 	Tags        []string
+	Interval    int    // execution interval in seconds (0 = not specified)
 	Level       int    // 1, 2, 3 for detection queries; 0 for others
 	Category    string // detection, policy, incident_response
 	Subcategory string // e.g., execution, persistence, c2
@@ -25,6 +26,7 @@ type Query struct {
 var (
 	tagsRegex     = regexp.MustCompile(`^--\s*tags:\s*(.+)$`)
 	platformRegex = regexp.MustCompile(`^--\s*platform:\s*(.+)$`)
+	intervalRegex = regexp.MustCompile(`^--\s*interval:\s*(\d+)$`)
 	levelRegex    = regexp.MustCompile(`^(\d)-(.+)\.sql$`)
 )
 
@@ -138,6 +140,12 @@ func parseQuery(path, category, categoryPath string) (Query, error) {
 			// Check for platform
 			if matches := platformRegex.FindStringSubmatch(line); matches != nil {
 				q.Platform = normalizePlatform(strings.TrimSpace(matches[1]))
+				continue
+			}
+
+			// Check for interval
+			if matches := intervalRegex.FindStringSubmatch(line); matches != nil {
+				fmt.Sscanf(matches[1], "%d", &q.Interval)
 				continue
 			}
 
@@ -279,6 +287,11 @@ func writeQueryYAML(w *os.File, q Query) error {
 
 	if q.Platform != "" {
 		w.WriteString(fmt.Sprintf("  platform: %s\n", q.Platform))
+	}
+
+	// Add interval if specified
+	if q.Interval > 0 {
+		w.WriteString(fmt.Sprintf("  interval: %d\n", q.Interval))
 	}
 
 	// Add logging type based on category

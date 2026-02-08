@@ -172,6 +172,7 @@ spec:
       s.remote_port
     HAVING
       remote_address != ''
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -1001,6 +1002,7 @@ spec:
       s.pid,
       exception_key
   platform: darwin,linux
+  interval: 601
   logging: differential
 ---
 apiVersion: v1
@@ -1567,6 +1569,7 @@ spec:
       AND family = 2 -- PF_INET
       AND protocol = 1 -- ICMP
       AND p.name NOT IN ('ping')
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -2065,6 +2068,7 @@ spec:
     HAVING
       num_downloads > 8
   platform: darwin
+  interval: 3600
   logging: differential
 ---
 apiVersion: v1
@@ -2097,6 +2101,7 @@ spec:
     ORDER BY
       file.path ASC
   platform: darwin
+  interval: 3600
   logging: differential
 ---
 apiVersion: v1
@@ -3116,6 +3121,7 @@ spec:
     GROUP BY
       pe.pid
   platform: linux
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -3240,6 +3246,7 @@ spec:
     GROUP BY
       pe.pid
   platform: darwin
+  interval: 600
   logging: differential
 ---
 apiVersion: v1
@@ -3606,6 +3613,7 @@ spec:
     HAVING
       count = 0;
   platform: linux
+  interval: 600
   logging: differential
 ---
 apiVersion: v1
@@ -3682,6 +3690,7 @@ spec:
     HAVING
       count == 0;
   platform: darwin
+  interval: 600
   logging: differential
 ---
 apiVersion: v1
@@ -6097,6 +6106,7 @@ spec:
       p.cmdline,
       p.cwd;
   platform: linux
+  interval: 600
   logging: differential
 ---
 apiVersion: v1
@@ -9004,6 +9014,7 @@ spec:
         'tar,0,incusd,systemd'
       )
   platform: linux
+  interval: 600
   logging: differential
 ---
 apiVersion: v1
@@ -9226,6 +9237,7 @@ spec:
         'yara,500,bash,fish'
       )
   platform: darwin
+  interval: 180
   logging: differential
 ---
 apiVersion: v1
@@ -10209,6 +10221,7 @@ spec:
       AND NOT p1_cmd LIKE '/usr/bin/bash /usr/bin/makepkg %'
       AND NOT url in ('https://aur.archlinux.org')
   platform: darwin,linux
+  interval: 120
   logging: differential
 ---
 apiVersion: v1
@@ -10449,6 +10462,7 @@ spec:
         p.path = "/"
         AND file.size < 8192
       )
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -10538,6 +10552,7 @@ spec:
         AND f.mode NOT LIKE '0%'
       )
   platform: linux
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -11180,6 +11195,7 @@ spec:
     GROUP BY
       pe.pid
   platform: darwin,linux
+  interval: 450
   logging: differential
 ---
 apiVersion: v1
@@ -11521,6 +11537,7 @@ spec:
     GROUP BY
       pe.pid
   platform: darwin
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -12011,6 +12028,7 @@ spec:
     GROUP BY
       pe.pid
   platform: linux
+  interval: 600
   logging: differential
 ---
 apiVersion: v1
@@ -12149,6 +12167,7 @@ spec:
     GROUP BY
       pe.pid
   platform: darwin
+  interval: 900
   logging: differential
 ---
 apiVersion: v1
@@ -12268,6 +12287,7 @@ spec:
     GROUP BY
       pe.pid
   platform: darwin
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -12345,6 +12365,7 @@ spec:
         pe.path,
         pe.cmdline
   platform: darwin
+  interval: 900
   logging: differential
 ---
 apiVersion: v1
@@ -12535,6 +12556,7 @@ spec:
     GROUP BY
       p0_pid
   platform: linux
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -12642,6 +12664,7 @@ spec:
     GROUP BY
       p0_pid
   platform: darwin
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -12695,6 +12718,7 @@ spec:
         AND NOT pe.value = '/System/Library/Frameworks'
       )
   platform: darwin
+  interval: 60
   logging: differential
 ---
 apiVersion: v1
@@ -12795,6 +12819,7 @@ spec:
     GROUP BY
       pe.pid
   platform: linux
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -13164,6 +13189,7 @@ spec:
       p.cwd,
       p.euid;
   platform: darwin
+  interval: 240
   logging: differential
 ---
 apiVersion: v1
@@ -13477,6 +13503,7 @@ spec:
       -- Surfshark
       AND NOT pe.path LIKE '/Library/SystemExtensions/%/com.surfshark.vpnclient.macos.direct.PacketTunnel-WireGuard.systemextension/Contents/MacOS'
   platform: darwin
+  interval: 900
   logging: differential
 ---
 apiVersion: v1
@@ -13552,6 +13579,7 @@ spec:
       AND p0_path NOT LIKE '/private/tmp/PKInstallSandbox.%/Scripts/com.microsoft.OneDrive.%/OneDrivePkgTelemetry'
       AND NOT p0_cgroup LIKE '/system.slice/docker-%'
   platform: darwin,linux
+  interval: 180
   logging: differential
 ---
 apiVersion: v1
@@ -13751,6 +13779,7 @@ spec:
     }'
       AND yara.count > 0
   platform: darwin,linux
+  interval: 7200
   logging: differential
 ---
 apiVersion: v1
@@ -13816,6 +13845,7 @@ spec:
         }'
       AND yara.count > 0
   platform: linux
+  interval: 7199
   logging: differential
 ---
 apiVersion: v1
@@ -14185,6 +14215,7 @@ spec:
       )
       AND p0_name != 'git-remote-htp'
   platform: linux
+  interval: 7200
   logging: differential
 ---
 apiVersion: v1
@@ -14298,6 +14329,7 @@ spec:
         '/Library/safeqclientcore/bin/safeqclientcore'
       )
   platform: darwin,linux
+  interval: 7200
   logging: differential
 ---
 apiVersion: v1
@@ -15069,6 +15101,7 @@ spec:
     GROUP BY
       pe.pid
   platform: darwin,linux
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -15376,6 +15409,7 @@ spec:
       AND NOT p0.cgroup_path LIKE '/system.slice/docker-%'
       AND NOT p0.cgroup_path LIKE '/system.slice/system.slice:docker:%'
   platform: darwin,linux
+  interval: 60
   logging: differential
 ---
 apiVersion: v1
@@ -17947,6 +17981,7 @@ spec:
     GROUP BY
       pe.pid
   platform: linux
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -20450,6 +20485,7 @@ spec:
       }'
       AND yara.count > 0
   platform: darwin,linux
+  interval: 3600
   logging: differential
 ---
 apiVersion: v1
@@ -20603,6 +20639,7 @@ spec:
         '/usr/sbin/smartd'
       )
   platform: linux
+  interval: 7200
   logging: differential
 ---
 apiVersion: v1
@@ -20671,6 +20708,7 @@ spec:
       AND file.mode NOT LIKE '0%'
       AND pe.env_size > 3500
   platform: darwin,linux
+  interval: 60
   logging: differential
 ---
 apiVersion: v1
@@ -20878,6 +20916,7 @@ spec:
       AND p0_cmd NOT LIKE '%bwrap --bind %'
       AND p0_cmd NOT LIKE '%sudo %--vmodule=% --audit-policy-file=%kube%'
   platform: darwin,linux
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
@@ -21019,6 +21058,7 @@ spec:
     GROUP BY
       pe.pid
   platform: linux
+  interval: 600
   logging: differential
 ---
 apiVersion: v1
@@ -21149,6 +21189,7 @@ spec:
         AND pe.path = '/System/Library/Frameworks/CoreMediaIO.framework/Versions/A/Resources/AppleCamera.plugin/Contents/Resources/AppleCameraAssistant'
       )
   platform: darwin
+  interval: 300
   logging: differential
 ---
 apiVersion: v1
