@@ -238,13 +238,34 @@ func writeFleetYAML(queries []Query, outputDir string) error {
 			if i > 0 {
 				file.WriteString("---\n")
 			}
-			if err := writeQueryYAML(file, q); err != nil {
+			if err := writeQueryYAML(file, q, 0); err != nil {
 				file.Close()
 				return err
 			}
 		}
 		file.Close()
 		fmt.Printf("Wrote %s (%d queries)\n", filename, len(categoryQueries))
+	}
+
+	// Write detection rules with 5-minute interval for all
+	if detectionQueries := groups["detection"]; len(detectionQueries) > 0 {
+		scheduledFile := filepath.Join(outputDir, "chainguard-detection-5min.yml")
+		file, err := os.Create(scheduledFile)
+		if err != nil {
+			return fmt.Errorf("creating %s: %w", scheduledFile, err)
+		}
+
+		for i, q := range detectionQueries {
+			if i > 0 {
+				file.WriteString("---\n")
+			}
+			if err := writeQueryYAML(file, q, 300); err != nil {
+				file.Close()
+				return err
+			}
+		}
+		file.Close()
+		fmt.Printf("Wrote %s (%d queries, 5-min interval)\n", scheduledFile, len(detectionQueries))
 	}
 
 	// Also write a combined file
@@ -259,7 +280,7 @@ func writeFleetYAML(queries []Query, outputDir string) error {
 		if i > 0 {
 			file.WriteString("---\n")
 		}
-		if err := writeQueryYAML(file, q); err != nil {
+		if err := writeQueryYAML(file, q, 0); err != nil {
 			return err
 		}
 	}
@@ -268,7 +289,7 @@ func writeFleetYAML(queries []Query, outputDir string) error {
 	return nil
 }
 
-func writeQueryYAML(w *os.File, q Query) error {
+func writeQueryYAML(w *os.File, q Query, intervalOverride int) error {
 	// Escape description for YAML
 	desc := escapeYAML(q.Description)
 	query := escapeYAMLMultiline(q.Query)
@@ -289,9 +310,13 @@ func writeQueryYAML(w *os.File, q Query) error {
 		w.WriteString(fmt.Sprintf("  platform: %s\n", q.Platform))
 	}
 
-	// Add interval if specified
-	if q.Interval > 0 {
-		w.WriteString(fmt.Sprintf("  interval: %d\n", q.Interval))
+	// Add interval: use override if specified, otherwise use query's interval
+	interval := q.Interval
+	if intervalOverride > 0 {
+		interval = intervalOverride
+	}
+	if interval > 0 {
+		w.WriteString(fmt.Sprintf("  interval: %d\n", interval))
 	}
 
 	// Add logging type based on category
