@@ -1,0 +1,50 @@
+name: Convert to FleetDM
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build converter
+        run: go build -o bin/convert ./cmd/convert
+
+      - name: Run conversion
+        run: ./bin/convert -upstream upstream -output output
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fleetdm-queries
+          path: output/*.yml
+
+      - name: Commit generated files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update FleetDM queries from upstream"
+            git push
+          fi

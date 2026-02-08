@@ -1,0 +1,110 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'upstream'
+      - 'cmd/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Get upstream version info
+        id: version
+        run: |
+          cd upstream
+          UPSTREAM_SHA=$(git rev-parse --short HEAD)
+          UPSTREAM_DATE=$(git log -1 --format=%cs)
+          cd ..
+          echo "upstream_sha=$UPSTREAM_SHA" >> $GITHUB_OUTPUT
+          echo "upstream_date=$UPSTREAM_DATE" >> $GITHUB_OUTPUT
+          echo "tag=v$(date +%Y%m%d)-${UPSTREAM_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Check if release exists
+        id: check_release
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" &>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Go
+        if: steps.check_release.outputs.exists == 'false'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build and convert
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          go build -o bin/convert ./cmd/convert
+          ./bin/convert -upstream upstream -output output
+
+      - name: Get query counts
+        if: steps.check_release.outputs.exists == 'false'
+        id: counts
+        run: |
+          DETECTION=$(grep -c "^apiVersion:" output/chainguard-detection.yml || echo 0)
+          IR=$(grep -c "^apiVersion:" output/chainguard-incident-response.yml || echo 0)
+          POLICY=$(grep -c "^apiVersion:" output/chainguard-policy.yml || echo 0)
+          TOTAL=$((DETECTION + IR + POLICY))
+          echo "detection=$DETECTION" >> $GITHUB_OUTPUT
+          echo "ir=$IR" >> $GITHUB_OUTPUT
+          echo "policy=$POLICY" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        if: steps.check_release.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: FleetDM Queries ${{ steps.version.outputs.tag }}
+          body: |
+            ## FleetDM-compatible queries from osquery-defense-kit
+
+            Based on upstream commit: [`${{ steps.version.outputs.upstream_sha }}`](https://github.com/chainguard-dev/osquery-defense-kit/commit/${{ steps.version.outputs.upstream_sha }}) (${{ steps.version.outputs.upstream_date }})
+
+            ### Query counts
+            | Category | Count |
+            |----------|-------|
+            | Detection | ${{ steps.counts.outputs.detection }} |
+            | Incident Response | ${{ steps.counts.outputs.ir }} |
+            | Policy | ${{ steps.counts.outputs.policy }} |
+            | **Total** | **${{ steps.counts.outputs.total }}** |
+
+            ### Usage
+
+            Download the YAML files and import to FleetDM:
+
+            ```bash
+            fleetctl apply -f chainguard-all.yml
+            ```
+
+            Or import individual categories:
+
+            ```bash
+            fleetctl apply -f chainguard-detection.yml
+            fleetctl apply -f chainguard-incident-response.yml
+            fleetctl apply -f chainguard-policy.yml
+            ```
+          files: |
+            output/chainguard-all.yml
+            output/chainguard-detection.yml
+            output/chainguard-incident-response.yml
+            output/chainguard-policy.yml
+          make_latest: true
