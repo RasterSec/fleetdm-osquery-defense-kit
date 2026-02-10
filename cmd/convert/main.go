@@ -268,6 +268,27 @@ func writeFleetYAML(queries []Query, outputDir string) error {
 		fmt.Printf("Wrote %s (%d queries, 5-min interval)\n", scheduledFile, len(detectionQueries))
 	}
 
+	// Write incident response rules with 10-minute interval for all
+	if irQueries := groups["incident_response"]; len(irQueries) > 0 {
+		scheduledFile := filepath.Join(outputDir, "chainguard-incident-response-10min.yml")
+		file, err := os.Create(scheduledFile)
+		if err != nil {
+			return fmt.Errorf("creating %s: %w", scheduledFile, err)
+		}
+
+		for i, q := range irQueries {
+			if i > 0 {
+				file.WriteString("---\n")
+			}
+			if err := writeQueryYAML(file, q, 600); err != nil {
+				file.Close()
+				return err
+			}
+		}
+		file.Close()
+		fmt.Printf("Wrote %s (%d queries, 10-min interval)\n", scheduledFile, len(irQueries))
+	}
+
 	// Also write a combined file
 	combinedFile := filepath.Join(outputDir, "chainguard-all.yml")
 	file, err := os.Create(combinedFile)
