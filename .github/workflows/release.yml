@@ -103,17 +103,22 @@ jobs:
             fleetctl apply -f chainguard-policy.yml
             ```
 
-            ### Scheduled Detection (5-minute interval)
+            ### Scheduled Queries
 
-            Use this file if you want all detection rules to run every 5 minutes:
+            Use these files if you want scheduled intervals:
 
             ```bash
+            # Detection rules every 5 minutes
             fleetctl apply -f chainguard-detection-5min.yml
+
+            # Incident response rules every 10 minutes
+            fleetctl apply -f chainguard-incident-response-10min.yml
             ```
           files: |
             output/chainguard-all.yml
             output/chainguard-detection.yml
             output/chainguard-detection-5min.yml
             output/chainguard-incident-response.yml
+            output/chainguard-incident-response-10min.yml
             output/chainguard-policy.yml
           make_latest: true
