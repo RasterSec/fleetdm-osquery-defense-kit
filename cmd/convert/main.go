@@ -1,3 +1,4 @@
+// Package main converts osquery-defense-kit queries to FleetDM format
 package main
 
 import (
